@@ -1,0 +1,279 @@
+import React, { Component } from 'react';
+import axios from 'axios';
+import ReactMapboxGl, { Layer, Feature } from "react-mapbox-gl";
+//import ReactMapGL, {Marker} from 'react-map-gl';
+import {Badge,  Table} from "reactstrap";
+import { observable } from 'mobx'
+import { observer } from 'mobx-react'
+import cookie from 'react-cookies'
+
+import userStore from "../../stores/UserStore"
+
+
+/*const Map = ReactMapboxGl({
+  accessToken: "pk.eyJ1IjoicnViZW5oYWJpYiIsImEiOiJjanUzNGRnaTgwamNqNDRuN2JyNTlwaWFpIn0.Fw9shSLFXP8MgfLmxoFnqA"
+});*/
+
+var bollardState = observable({
+  tab: []
+});
+
+//const AnyReactComponent = ({ text }) => <div>{text}</div>;
+
+const Map = ReactMapboxGl({
+  accessToken:
+    "pk.eyJ1Ijoic2t5bnVyYWsiLCJhIjoiY2pqdTZydW1rOGtxdTNwczJmdm5henRndiJ9.VKA1MVztPqrirg-ZKBQGsw"
+});
+
+const localisations = [];
+
+const BollardTab = observer(function BollardTab(props) {
+  const list = props.list;
+  console.log(list)
+  const tab = list.map((bollard) =>
+
+    <tr key={bollard.id.toString()}>
+      <td>{bollard.id}</td>
+      <td>{bollard.latitude}</td>
+      <td>{bollard.longitude}</td>
+      <td>
+        {bollard.status == 0 ?
+          <Badge color="success">Libre</Badge>
+          :
+          <Badge color="danger">Occupé</Badge>
+        }
+      </td>
+      <td>
+        <input type={"numbers"} value={bollardState.tab[bollardState.tab.findIndex(elem => elem.id === bollard.id)].price} onChange={(e) => {
+          bollardState.tab[bollardState.tab.findIndex(elem => elem.id === bollard.id)].price = e.target.value;
+
+        }}></input>
+      </td>
+      <td>{!bollard.status && bollard.license_plate != null ? bollard.license_plate.name : "N/A"}</td>
+      {//<td>{!bollard.status ? bollard.start_at : "N/A"}</td>
+      }
+      <td>{!bollard.status && bollard.license_plate != null ? bollard.license_plate.id : "N/A"}</td>
+    </tr>
+
+  );
+  return (
+    tab
+  );
+})
+
+var defaultHeader = {
+  "Accept": "application/json",
+  "Content-type": "application/json",
+  'Authorization': 'Bearer '
+}
+
+function checkToken() {
+  var userData = cookie.load('userData');
+
+  if (userData === undefined) {
+    error401()
+    return false;
+  }
+  defaultHeader.Authorization = 'Bearer ' + userData;
+  return true;
+}
+
+function error401() {
+  userStore.state.history.push('/login')
+  alert("Votre session a expire")
+}
+
+var handleError = (error) => {
+  if (error.response) {
+    console.error(error.response.data)
+    if (error.response.status == 401) error401();
+  }
+  else
+    console.error("request error");
+}
+
+var get = () => {
+  console.log("try get")
+
+  if (checkToken()) {
+    axios.get("http://dev.api.parkyeip.com/admin/bollards", { headers: defaultHeader })
+      .then((response) => {
+        console.log(response.data.data);
+        bollardState.tab = response.data.data;
+
+        
+      })
+              .catch((error) => {
+          let e = [""];
+          handleError(error, e)
+          updateStatus("Echec", e[0], 0);
+        });
+  }
+}
+
+
+const Quartiers = observer(class Quartiers extends Component {
+
+  handleChange(event) {
+    this.setState({ items: event.target.value });
+  }
+
+  constructor(props) {
+
+    super(props);
+    this.state = {
+      items: [],
+      tables: [],
+      localisations: [],
+      lng: 5,
+      lat: 34,
+      zoom: 1.5,
+      viewport: {
+        width: 800,
+        height: 600,
+        latitude: 37.7577,
+        longitude: -122.4376,
+        zoom: 8
+      }
+    }
+
+    };
+
+
+
+  componentDidMount() {
+    get();
+    if (checkToken()) {
+      updateStatus("Loading", null);
+      axios.get("http://dev.api.parkyeip.com/admin/bollards", { headers: defaultHeader })
+      .then(res => {
+        const items = res.data.data;
+        const tables = [];
+        console.log(res)
+        let children = []
+        Object.keys(items[0]).forEach(function (item) {
+          children.push(<td >{item}</td>)
+        });
+        tables.push(<tr key={99}>{children}</tr>)
+        for (var i = 0; i < items.length; i++){
+          let children = []
+          Object.keys(items[i]).forEach( (item) => {
+            if (items[i][item] == null)
+              children.push(<td ><input value={null}/></td>)
+            else {
+              if (item.toString() === "latitude" || item.toString() === "longitude") {
+                console.log("REMPLI LE TAB");
+                localisations.push(items[i][item])
+              }
+              children.push(<td><input
+                className='form-control'
+                value={items[i][item].toString()}
+              />
+              </td>)
+
+            }
+
+            console.log("Item == " + item.toString()); // key
+            console.log("items[i][item] == " + items[i][item]); // value
+          });
+
+          tables.push(<tr key={i.toString()}> {children} </tr>)
+          console.log(items)
+        }
+
+
+        this.setState({ items, tables });
+      })
+              .catch((error) => {
+          let e = [""];
+          handleError(error, e)
+          updateStatus("Echec", e[0], 0);
+        });
+    }
+
+
+    /*axios.get(`https://dev.api.parkyeip.com/admin/bollard?latitude=43.292455197937436&longitude=6.041681739211526&radius=100&status=2`)
+      .then(res => {
+        bollardState.tab = res.data.data;
+
+      })
+      .catch((e) => {
+        console.log(e.response)
+
+      })*/
+
+
+  }
+
+
+  placeMarkers()
+  {
+    var indents = [];
+    for (var x = 0; x <= localisations.length - 2; x = x + 2) {
+      console.log("LOCAL TAB === " + localisations[x + 1]);
+      console.log("LOCAL TAB === " + localisations[x]);
+      indents.push(<Feature coordinates={[localisations[x + 1], localisations[x]]} />)
+    }
+    return (indents);
+  }
+
+  render() {
+
+    return (
+      <div>
+        <Table responsive bordered>
+          <thead>
+          <tr>
+            <th>Id de la borne</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Statut</th>
+            <th>Prix</th>
+            <th>Immatriculation</th>
+            {//<th>Arrivé à</th>
+            }
+            <th>Id de l'uttilisateur</th>
+          </tr>
+          </thead>
+          <tbody>
+          <BollardTab list={bollardState.tab} />
+          </tbody>
+        </Table>
+
+        <Map         style="mapbox://styles/mapbox/basic-v9"
+                     containerStyle={{
+                       height: "calc(100vh - 130px)",
+                       width: "50vw"
+                     }}
+                     center={[2.373700, 48.866249]}
+                     zoom={[13]}
+        >
+
+          <Layer
+            type="circle"
+            id="marker"
+            paint={{
+              "circle-color": "#ff5200",
+              "circle-stroke-width": 1,
+              "circle-stroke-color": "#fff",
+              "circle-stroke-opacity": 1
+            }}
+          >
+
+            {this.placeMarkers()}
+
+          </Layer>
+
+        </Map>
+      </div>
+
+    );
+  }
+
+
+})
+/*<Marker latitude={43.30599636701634} longitude={5.382147216796852} offsetLeft={-20} offsetTop={-10}>
+  <div>You are here</div>
+  <img src={require('./mapMarker.png')} />
+</Marker>*/
+export default (Quartiers)

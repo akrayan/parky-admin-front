@@ -1,0 +1,96 @@
+import React, { Component, Suspense } from 'react';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import {observer} from 'mobx-react'
+import { Container } from 'reactstrap';
+//import cookie from 'react-cookies'
+//import axios from 'axios'
+
+import {
+  AppBreadcrumb,
+  AppHeader,
+  AppSidebar,
+  AppSidebarFooter,
+  AppSidebarForm,
+  AppSidebarHeader,
+  AppSidebarMinimizer,
+  AppSidebarNav,
+} from '@coreui/react';
+
+import { getnav } from '../../_nav';
+import routes from '../../routes';
+
+import userStore from '../../stores/UserStore'
+import { unloadStore } from '../../stores/UnloadStore';
+
+
+
+import authRequest from '../../apiRequest/AuthRequest'
+
+
+const DefaultHeader = React.lazy(() => import('./DefaultHeader'));
+
+const DefaultLayout = observer(class DefaultLayout extends Component {
+
+  loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
+
+  signOut(e) {
+    e.preventDefault()
+    unloadStore()
+    this.props.history.push('/login')
+  }
+
+  constructor(props) {
+    super(props);
+  
+    userStore.state.history = this.props.history;
+    authRequest.get();
+  }
+
+
+  render() {
+    return (
+      <div className="app">
+        <AppHeader fixed>
+          <Suspense fallback={this.loading()}>
+            <DefaultHeader onLogout={e => this.signOut(e)} />
+          </Suspense>
+        </AppHeader>
+        <div className="app-body">
+          <AppSidebar fixed display="lg">
+            <AppSidebarHeader />
+            <AppSidebarForm />
+            <Suspense>
+              <AppSidebarNav navConfig={getnav(userStore.state.permission)} {...this.props} />
+            </Suspense>
+            <AppSidebarFooter />
+            <AppSidebarMinimizer />
+          </AppSidebar>
+          <main className="main">
+            <AppBreadcrumb appRoutes={routes} />
+            <Container fluid>
+              <Suspense fallback={this.loading()}>
+                <Switch>
+                  {routes.map((route, idx) => {
+                    return route.component ? (
+                      <Route
+                        key={idx}
+                        path={route.path}
+                        exact={route.exact}
+                        name={route.name}
+                        render={props => (
+                          <route.component {...props} />
+                        )} />
+                    ) : (null);
+                  })}
+                  <Redirect from="/" to="/dashboard" />
+                </Switch>
+              </Suspense>
+            </Container>
+          </main>
+        </div>
+      </div>
+    );
+  }
+})
+
+export default DefaultLayout;

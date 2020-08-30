@@ -1,0 +1,37 @@
+.backgroundCard {
+    height: 150px;
+    background-size: 20%;
+    background-repeat: no-repeat;
+    background-position: right 10px bottom 5px;
+}
+
+.backgroundCard.inews {
+    background-image: url("../../images/BackIcon/news-white.png");
+}
+
+.backgroundCard.neighborhood {
+    background-image: url("../../images/BackIcon/neighborhood-white.png");
+}
+
+.backgroundCard.offence {
+    background-image: url("../../images/BackIcon/offence-white.png");
+}
+
+.backgroundCard.ticket {
+    background-image: url("../../images/BackIcon/ticket-white.png");
+}
+
+.backgroundCard.users {
+    background-image: url("../../images/BackIcon/users-white.png");
+}
+
+.icard {
+    height: 150px;
+    width: 300px;
+    margin: 10px;
+    padding: 5px;
+}
+
+.bigText {
+    font-size: xx-large;
+}

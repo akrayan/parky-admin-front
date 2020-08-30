@@ -1,0 +1,36 @@
+
+.ListRoleCol {
+    max-width: 200px;
+}
+
+.RoleCol {
+    max-width: 800px;
+    padding-left: 50px;
+}
+
+.SupRuleRow {
+    padding-bottom: 25px;
+    padding-top: 25px;
+    border-bottom-style: solid;
+    border-color: 	#c8ced3;
+    border-width: 1px;
+}
+
+.SupRuleRow.First {
+    padding-top: 0px;
+}
+
+.RuleRow {
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.SubRuleRow {
+    align-items: center;
+    margin-right: 30;
+}
+
+.SubRuleLabel {
+    margin-right: 10;
+}
+

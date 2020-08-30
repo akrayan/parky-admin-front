@@ -1,0 +1,24 @@
+.addButtonN {
+    display: block;
+    margin: auto;
+    margin-left: 65px;
+    margin-right: 65px;
+    width: 90px;
+    height: 90px;
+    border-style: solid;
+    border-color: rgb(211, 148, 75);
+}
+
+.addImageN {
+    display: block;
+    margin: auto;
+    width: 30px;
+    height: 30px;
+}
+
+.mycard {
+    
+    width: 200px;
+    margin: 10px;
+    cursor: pointer;
+}

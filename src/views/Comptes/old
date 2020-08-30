@@ -1,0 +1,466 @@
+j'evite les bug de merge et je met mon msg de commit
+
+
+import React, { Component } from 'react';
+import './Comptes.css'
+
+const emailRegex = RegExp(/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/)
+
+const formValid = ({formErrors, ...rest}) => {
+  let valid = true;
+
+  Object.values(formErrors).forEach(val => {
+    val.length > 0 && (valid = false)
+  });
+
+  Object.values(rest).forEach(val => {
+    val == null && (valid = false)
+  });
+
+  return valid;
+}
+
+class Popup extends Component {
+  constructor(props){
+    super(props);
+    this.state={
+      firstName: null,
+      lastName: null,
+      email: null,
+      password: null,
+      role: null,
+      formErrors: {
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        role: ""
+
+      }
+    }
+  }
+  handleSubmit = e => {
+    e.preventDefault();
+
+    if (formValid(this.state)) {
+      console.log(`
+        --SUBMITTING--
+          First Name: ${this.state.firstName}
+        Last Name: ${this.state.lastName}
+        Email: ${this.state.email}
+        Password: ${this.state.password}
+        Role: ${this.state.role}
+
+       `)
+
+    } else {
+      console.error('FORM INVALID - DISPLAY ERROR MESSAGE');
+    }
+  };
+
+  handleChange = e => {
+    e.preventDefault();
+    const {name, value} = e.target;
+    let formErrors = this.state.formErrors
+
+
+    switch (name) {
+      case 'firstName':
+        formErrors.firstName = value.length < 2 ? '2 caractères requis au minimum' : "";
+        break;
+      case 'lastName':
+        formErrors.lastName = value.length < 3 ? '3 caractères requis au minimum' : "";
+        break;
+      case 'email':
+        formErrors.email = emailRegex.test(value) ? '' : "adresse mail invalide";
+        break;
+      case 'password':
+        formErrors.password = value.length < 7 ? '7 caractères requis au minimum' : "";
+        break;
+      case 'role':
+        formErrors.role = value.length < 2 ? '2 caractères requis au minimum' : "";
+        break;
+      default:
+        break;
+    }
+    this.setState({formErrors, [name]: value}, () => console.log(this.state));
+  };
+  render() {
+    const {formErrors} =this.state;
+    return (
+      <div className='popup'>
+        <div className='popup_inner'>
+          <h1>Nouvel utilisateur</h1>
+          <form onSubmit={this.handleSubmit} noValidate>
+            <div className="firstName">
+              <label htmlFor="firstName">Prénom</label>
+              <input
+                type="text"
+                className={formErrors.firstName.length > 0 ? "error" : null}
+                placeholder="Prénom"
+                name="firstName"
+                noValidate
+                onChange={this.handleChange}
+              />
+              {formErrors.firstName.length > 0 &&(
+                <span className="errorMessage">{formErrors.firstName} </span>
+              )}
+            </div>
+            <div className="lastName">
+              <label htmlFor="lastName">Nom de famille</label>
+              <input
+                type="text"
+                className={formErrors.lastName.length > 0 ? "error" : null}
+                placeholder="Nom de famille"
+                name="lastName"
+                noValidate
+                onChange={this.handleChange}
+              />
+              {formErrors.lastName.length > 0 &&(
+                <span className="errorMessage">{formErrors.lastName} </span>
+              )}
+            </div>
+            <div className="email">
+              <label htmlFor="email">Adresse mail</label>
+              <input
+                type="text"
+                className={formErrors.email.length > 0 ? "error" : null}
+                placeholder="Adresse mail"
+                name="email"
+                noValidate
+                onChange={this.handleChange}
+              />
+              {formErrors.email.length > 0 &&(
+                <span className="errorMessage">{formErrors.email} </span>
+              )}
+            </div>
+            <div className="password">
+              <label htmlFor="password">Mot de passe</label>
+              <input
+                type="password"
+                className={formErrors.password.length > 0 ? "error" : null}
+                placeholder="Mot de passe"
+                name="password"
+                noValidate
+                onChange={this.handleChange}
+              />
+              {formErrors.password.length > 0 &&(
+                <span className="errorMessage">{formErrors.password} </span>
+              )}
+            </div>
+              <div className="role">
+                <label htmlFor="role">Rôle</label>
+                <input
+                  type="role"
+                  className={formErrors.role.length > 0 ? "error" : null}
+                  placeholder="Admin, ASVP, Visiteur"
+                  name="role"
+                  noValidate
+                  onChange={this.handleChange}
+                />
+                {formErrors.password.length > 0 &&(
+                  <span className="errorMessage">{formErrors.password} </span>
+                )}
+            </div>
+            <div className="createAccount">
+              <button  type="Submit">sauvegarder le compte</button>
+            </div>
+          </form>
+          <button onClick={this.props.closePopup}>fermer</button>
+        </div>
+      </div>
+    );
+  }
+}
+
+class Accounts extends Component {
+  constructor() {
+    super();
+    this.state = {
+      showPopup: false
+    };
+  }
+
+  togglePopup() {
+    this.setState({
+      showPopup: !this.state.showPopup
+    });
+  }
+
+  render() {
+    return (
+      <div className="animated fadeIn">
+        <h1>Utilisateurs</h1>
+
+        <table>
+          <tr>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Mail</th>
+            <th>Rôle</th>
+          </tr>
+          <tr>
+            <td>Roumanille</td>
+            <td>Romain</td>
+            <td>romain.roumanille@epitech.eu</td>
+            <td>Admin</td>
+            <button type="button">Modifier</button>
+            <button type="button">Suspendre</button>
+            <button type="button">Supprimer</button>
+          </tr>
+          <tr>
+            <td>Atlani</td>
+            <td>Mylan</td>
+            <td>mylan.atlani@epitech.eu</td>
+            <td>Admin</td>
+            <button type="button">Modifier</button>
+            <button type="button">Suspendre</button>
+            <button type="button">Supprimer</button>
+          </tr>
+          <tr>
+            <td>Monfourny</td>
+            <td>Laurent</td>
+            <td>laurent.monfourny@epitech.eu</td>
+            <td>ASVP</td>
+            <button type="button">Modifier</button>
+            <button type="button">Suspendre</button>
+            <button type="button">Supprimer</button>
+          </tr>
+          <tr>
+            <td>Viscaino</td>
+            <td>Rémy</td>
+            <td>remy.viscaino@epitech.eu</td>
+            <td>Admin</td>
+            <button type="button">Modifier</button>
+            <button type="button">Suspendre</button>
+            <button type="button">Supprimer</button>
+          </tr>
+          <tr>
+            <td>Habib</td>
+            <td>Ruben</td>
+            <td>ruben.habib@epitech.eu</td>
+            <td>Vsiteur</td>
+            <button type="button">Modifier</button>
+            <button type="button">Suspendre</button>
+            <button type="button">Supprimer</button>
+          </tr>
+          <tr>
+            <td>Akkach</td>
+            <td>Rayan</td>
+            <td>rayan.akkach@epitech.eu</td>
+            <td>Visiteur</td>
+            <button type="button">Modifier</button>
+            <button type="button">Suspendre</button>
+            <button type="button">Supprimer</button>
+          </tr>
+          <tr>
+            <td>Afou</td>
+            <td>Nacerdine</td>
+            <td>nacerdine.afou@epitech.eu</td>
+            <td>ASVP</td>
+            <button type="button">Modifier</button>
+            <button type="button">Suspendre</button>
+            <button type="button">Supprimer</button>
+          </tr>
+          <tr>
+            <td>Sabas</td>
+            <td>Nicolas</td>
+            <td>nicolas.sabas@epitech.eu</td>
+            <td>Visiteur</td>
+            <button type="button">Modifier</button>
+            <button type="button">Suspendre</button>
+            <button type="button">Supprimer</button>
+          </tr>
+          <tr>
+            <td>Kay</td>
+            <td>Miriam</td>
+            <td>kay.miri@outlook.de</td>
+            <td>ASVP</td>
+            <button type="button">Modifier</button>
+            <button type="button">Suspendre</button>
+            <button type="button">Supprimer</button>
+          </tr>
+          <tr>
+            <td>Bonnet</td>
+            <td>Nathan</td>
+            <td>nathan.bonnet@epitech.eu</td>
+            <td>Visiteur</td>
+            <button type="button">Modifier</button>
+            <button type="button">Suspendre</button>
+            <button type="button">Supprimer</button>
+          </tr>
+        </table>
+      </div>
+    );
+  }
+}
+export default Accounts;
+
+/*
+.popup {
+    position: sticky;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /*margin: auto;*/
+    margin-top: 10px;
+    margin-bottom: 100px;
+    margin-right: 10px;
+    margin-left: 1px;
+    box-shadow: 1px 1px 12px #555;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.popup {
+    background-color: white;
+    /* Green */
+    border: none;
+    color: black;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+label {
+    font-size: 0.8em;
+    margin-bottom: 0.25em;
+    color: #222;
+    font-weight: lighter;
+}
+
+input {
+    padding: 10px 10px;
+    border-radius: 5px;
+    outline: none;
+    border: 1px solid #cfcfcf;
+}
+
+input::placeholder {
+    font-size: 1.2em;
+    font-weight: lighter;
+    color: #999;
+}
+
+input.error {
+    border: 1px solid red;
+}
+
+.errorMessage {
+    color: red;
+    font-size: 0.75em;
+    display: relative;
+}
+
+.firstName {
+    margin-right: 1%;
+}
+
+.lastName {
+    margin-left: 1%;
+}
+
+.firstName,
+.lastName,
+.email,
+.password {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.firstName,
+.lastName {
+    width: 49%;
+}
+
+.email,
+.password {
+    width: 100%;
+}
+
+.createAccount {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.createAccount button {
+    background-color: #585858;
+    color: #fff;
+    border: 2px solid #fff;
+    width: 100%;
+    margin-top: 1em;
+    padding: 8px 0px;
+    font-size: 1em;
+    font-weight: lighter;
+    letter-spacing: 1px;
+    margin-bottom: 0.25em;
+}
+
+.createAccount button:hover {
+    color: #585858;
+    background-color: #fff;
+    border: 2px solid #585858;
+}
+
+.createAccount small {
+    color: #585858;
+    font-weight: lighter;
+}
+
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+th,
+td {
+    border-bottom: 1px solid #ddd;
+    padding: 15px;
+    text-align: left;
+}
+
+table {
+    margin-top: 3em;
+}
+
+td {
+    height: 50px;
+    vertical-align: bottom;
+    margin-left: 1.8em;
+    margin-top: 3em;
+}
+
+th {
+    text-align: left;
+    height: 50px;
+    margin-left: 1.8em;
+    margin-top: 10em;
+}
+
+h1 {
+    font-size: 4em;
+    color: #585858;
+}
+
+table {
+    width: 100%;
+}
+
+button1 {
+    margin-left: 35em;
+    background-color: #585858;
+    color: #fff;
+    width: 150%;
+    margin-top: 2em;
+    padding: 10px 24px;
+    font-size: 1em;
+    letter-spacing: 1px;
+    margin-bottom: 0.25em;
+}
+*/

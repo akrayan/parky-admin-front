@@ -1,0 +1,6 @@
+{
+  "name": "ParkyAdmin",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./ParkyAdmin.js"
+}
